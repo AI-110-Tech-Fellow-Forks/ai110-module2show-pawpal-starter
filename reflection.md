@@ -38,14 +38,18 @@
 **a. Constraints and priorities**
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
-    - 
+    - It considers time, so the time the owner has availible, then it considers the priority level of the task, and lastly the required time window, to make sure everything fits.
 - How did you decide which constraints mattered most?
+    - Time availability was the primary constraint because no matter how important a task is, it cannot be completed if the owner has no time. Priority was made secondary because when multiple tasks compete for limited time, importance should determine which ones make the cut — a high-priority medication should never be dropped in favor of a low-priority fetch session.
+
 
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+    - The scheduler uses a greedy algorithm, it picks tasks in priority order and locks in each one the moment it fits, without looking ahead. This means it can miss combinations that would actually fit more total tasks into the available time. For example, if a 30-minute high-priority task is chosen first and only 25 minutes remain, two 20-minute medium-priority tasks will both be dropped even though one of them could have fit if the high-priority task had been skipped.
 
+- Why is that tradeoff reasonable for this scenario?
+    - For a daily pet care app, the greedy approach is a good fit because the task lists are small so the suboptimal scheduling cases are rare. More importantly, the behavior is predictable and transparent to the owner they can always trust that the most important tasks were considered first.
 ---
 
 ## 3. AI Collaboration
@@ -53,11 +57,13 @@
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+
 - What kinds of prompts or questions were most helpful?
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+
 - How did you evaluate or verify what the AI suggested?
 
 ---
@@ -68,6 +74,17 @@
 
 - What behaviors did you test?
 - Why were these tests important?
+
+```
+=================================== test session starts ===================================
+platform darwin -- Python 3.13.12, pytest-9.1.0, pluggy-1.6.0
+rootdir: /Users/rshankar/Desktop/AI110-TF/ai110-module2show-pawpal-starter
+collected 13 items
+
+tests/test_pawpal.py .............                                                  [100%]
+
+=================================== 13 passed in 0.01s ===================================
+```
 
 **b. Confidence**
 

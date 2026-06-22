@@ -1,3 +1,6 @@
+from datetime import date, timedelta
+
+
 class Owner:
     def __init__(self, name: str, email: str = "", available_time_minutes: int = 120):
         self.name = name
@@ -40,13 +43,15 @@ class Pet:
 
 
 class Task:
-    def __init__(self, title: str, duration_minutes: int, priority: str = "medium", category: str = "general"):
+    def __init__(self, title: str, duration_minutes: int, priority: str = "medium", category: str = "general", pet_name: str = "", recurrence: str = ""):
         self.title = title
         self.category = category
         self.duration_minutes = duration_minutes
         self.priority = priority
+        self.pet_name = pet_name
         self.required_time_window: str = ""
-        self.is_recurring: bool = False
+        self.recurrence: str = recurrence  # "daily", "weekly", or ""
+        self.due_date: date = date.today()
         self.completed: bool = False
 
     def is_required(self) -> bool:
@@ -57,9 +62,26 @@ class Task:
         """Return a numeric score (1–3) used to sort tasks by importance."""
         return {"high": 3, "medium": 2, "low": 1}.get(self.priority, 1)
 
-    def mark_complete(self) -> None:
-        """Mark this task as completed."""
+    def mark_complete(self) -> "Task | None":
+        """Mark this task done; return a fresh copy with the next due date if recurring, else None."""
         self.completed = True
+        if self.recurrence == "daily":
+            days_ahead = 1
+        elif self.recurrence == "weekly":
+            days_ahead = 7
+        else:
+            return None
+        next_task = Task(
+            title=self.title,
+            duration_minutes=self.duration_minutes,
+            priority=self.priority,
+            category=self.category,
+            pet_name=self.pet_name,
+            recurrence=self.recurrence,
+        )
+        next_task.required_time_window = self.required_time_window
+        next_task.due_date = self.due_date + timedelta(days=days_ahead)
+        return next_task
 
 
 class ScheduledTask:
@@ -91,13 +113,17 @@ class DailySchedule:
         used = sum(st.get_duration() for st in self.scheduled_tasks)
         return used + task.duration_minutes <= self.total_time_available
 
-    def check_for_conflicts(self) -> bool:
-        """Return True if any two scheduled tasks overlap in time."""
+    def check_for_conflicts(self) -> list[str]:
+        """Return a list of warning strings for every overlapping task pair; empty list means no conflicts."""
+        warnings = []
         for i, a in enumerate(self.scheduled_tasks):
             for b in self.scheduled_tasks[i + 1:]:
                 if a.start_time < b.end_time and b.start_time < a.end_time:
-                    return True
-        return False
+                    warnings.append(
+                        f"WARNING: '{a.task.title}' ({a.start_time}–{a.end_time}) "
+                        f"overlaps with '{b.task.title}' ({b.start_time}–{b.end_time})"
+                    )
+        return warnings
 
     def get_explanation(self) -> str:
         """Return a formatted string summarising the day's schedule and time used."""
@@ -139,6 +165,42 @@ class Scheduler:
                 chosen.append(task)
                 remaining -= task.duration_minutes
         return chosen
+
+    def detect_conflicts(self, schedules: list[DailySchedule]) -> list[str]:
+        """Return warnings for overlapping tasks within each schedule and across different pet schedules."""
+        warnings = []
+        # Within each schedule
+        for schedule in schedules:
+            warnings.extend(schedule.check_for_conflicts())
+        # Across different pet schedules (owner can only do one thing at a time)
+        all_tasks = [st for s in schedules for st in s.scheduled_tasks]
+        for i, a in enumerate(all_tasks):
+            for b in all_tasks[i + 1:]:
+                if a.task.pet_name != b.task.pet_name and a.start_time < b.end_time and b.start_time < a.end_time:
+                    warnings.append(
+                        f"WARNING: '{a.task.title}' for {a.task.pet_name} ({a.start_time}–{a.end_time}) "
+                        f"conflicts with '{b.task.title}' for {b.task.pet_name} ({b.start_time}–{b.end_time})"
+                    )
+        return warnings
+
+    def complete_task(self, task: Task, task_list: list[Task]) -> None:
+        """Mark a task complete and append the next occurrence to task_list if it recurs."""
+        next_occurrence = task.mark_complete()
+        if next_occurrence:
+            task_list.append(next_occurrence)
+
+    def filter_tasks(self, tasks: list[Task], completed: bool = None, pet_name: str = None) -> list[Task]:
+        """Return tasks matching the given completion status and/or pet name; None means no filter applied."""
+        result = tasks
+        if completed is not None:
+            result = [t for t in result if t.completed == completed]
+        if pet_name is not None:
+            result = [t for t in result if t.pet_name == pet_name]
+        return result
+
+    def sort_by_time(self, tasks: list[Task]) -> list[Task]:
+        """Return tasks sorted by required_time_window ascending; tasks with no window sort last."""
+        return sorted(tasks, key=lambda t: t.required_time_window if t.required_time_window else "99:99")
 
     def assign_times(self, tasks: list[Task], start_time: str = "08:00", time_available: int = 0) -> DailySchedule:
         """Assign sequential start/end times to each task and return a DailySchedule."""
