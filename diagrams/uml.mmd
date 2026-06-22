@@ -6,6 +6,8 @@ classDiagram
         +string email
         +int available_time_minutes
         +list preferences
+        +Pet pet
+        +list~Task~ tasks
         +get_available_time() int
         +get_preferences() list
     }
@@ -30,25 +32,6 @@ classDiagram
         +bool is_recurring
         +is_required() bool
         +get_priority_score() int
-        +fits_in_slot(start_time, duration) bool
-    }
-
-    class DailySchedule {
-        +string date
-        +list scheduled_tasks
-        +int total_time_available
-        +list explanations
-        +add_task(task, start_time) void
-        +check_for_conflicts() bool
-        +get_explanation() string
-    }
-
-    class Scheduler {
-        +build_schedule(owner, pet, tasks, time_available) DailySchedule
-        +prioritize_tasks(tasks) list~Task~
-        +fit_tasks(prioritized_tasks, time_available) list~Task~
-        +assign_times(tasks) DailySchedule
-        +explain_choices() string
     }
 
     class ScheduledTask {
@@ -59,10 +42,31 @@ classDiagram
         +get_duration() int
     }
 
+    class DailySchedule {
+        +string date
+        +string start_time
+        +list~ScheduledTask~ scheduled_tasks
+        +int total_time_available
+        +list explanations
+        +add_task(scheduled_task) void
+        +has_room_for(task, start_time) bool
+        +check_for_conflicts() bool
+        +get_explanation() string
+    }
+
+    class Scheduler {
+        +DailySchedule last_schedule
+        +build_schedule(owner, pet, tasks, time_available) DailySchedule
+        +prioritize_tasks(tasks) list~Task~
+        +fit_tasks(prioritized_tasks, time_available) list~Task~
+        +assign_times(tasks, start_time) DailySchedule
+    }
+
     %% Relationships
     Owner "1" --> "1" Pet : owns
-    Owner "1" --> "1..*" Task : creates
-    Pet "1" --> "1..*" Task : requires
+    Owner "1" --> "0..*" Task : creates
+    Pet "1" --> "0..*" Task : requires
     Scheduler "1" --> "1" DailySchedule : builds
-    DailySchedule "1" --> "1..*" ScheduledTask : contains
-    ScheduledTask "1" --> "1" Task : schedules
+    Scheduler "1" --> "1" DailySchedule : last_schedule
+    DailySchedule "1" --> "0..*" ScheduledTask : contains
+    ScheduledTask "1" --> "1" Task : wraps

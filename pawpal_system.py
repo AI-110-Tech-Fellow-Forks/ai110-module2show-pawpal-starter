@@ -4,6 +4,8 @@ class Owner:
         self.email = email
         self.available_time_minutes = available_time_minutes
         self.preferences: list = []
+        self.pet: "Pet" = None
+        self.tasks: list["Task"] = []
 
     def get_available_time(self) -> int:
         pass
@@ -43,9 +45,6 @@ class Task:
     def get_priority_score(self) -> int:
         pass
 
-    def fits_in_slot(self, start_time: str, duration: int) -> bool:
-        pass
-
 
 class ScheduledTask:
     def __init__(self, task: Task, start_time: str, end_time: str, reason: str = ""):
@@ -59,13 +58,17 @@ class ScheduledTask:
 
 
 class DailySchedule:
-    def __init__(self, date: str, total_time_available: int):
+    def __init__(self, date: str, total_time_available: int, start_time: str = "08:00"):
         self.date = date
+        self.start_time = start_time
         self.scheduled_tasks: list[ScheduledTask] = []
         self.total_time_available = total_time_available
         self.explanations: list = []
 
-    def add_task(self, task: Task, start_time: str) -> None:
+    def add_task(self, scheduled_task: ScheduledTask) -> None:
+        pass
+
+    def has_room_for(self, task: Task, start_time: str) -> bool:
         pass
 
     def check_for_conflicts(self) -> bool:
@@ -76,6 +79,9 @@ class DailySchedule:
 
 
 class Scheduler:
+    def __init__(self):
+        self.last_schedule: DailySchedule = None
+
     def build_schedule(self, owner: Owner, pet: Pet, tasks: list[Task], time_available: int) -> DailySchedule:
         pass
 
@@ -85,8 +91,5 @@ class Scheduler:
     def fit_tasks(self, prioritized_tasks: list[Task], time_available: int) -> list[Task]:
         pass
 
-    def assign_times(self, tasks: list[Task]) -> DailySchedule:
-        pass
-
-    def explain_choices(self) -> str:
+    def assign_times(self, tasks: list[Task], start_time: str = "08:00") -> DailySchedule:
         pass
