@@ -3,9 +3,15 @@
 ## 1. System Design
 
 **a. Initial design**
+- 3 Actions:
+    - We need to allow users to enter information about their pet and upload it
+    - Take that information and let them add tasks they want need to accomplish
+    - Create a schedule based on these tasks
 
 - Briefly describe your initial UML design.
+    - 
 - What classes did you include, and what responsibilities did you assign to each?
+    - 
 
 **b. Design changes**
 
