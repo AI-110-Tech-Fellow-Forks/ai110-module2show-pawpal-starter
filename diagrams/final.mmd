@@ -1,0 +1,83 @@
+classDiagram
+    %% PawPal+ — Final Class Diagram (reflects pawpal_system.py)
+
+    class Owner {
+        +string name
+        +string email
+        +int available_time_minutes
+        +list preferences
+        +list~Pet~ pets
+        +list~Task~ tasks
+        +get_available_time() int
+        +get_preferences() list
+    }
+
+    class Pet {
+        +string name
+        +string species
+        +string breed
+        +int age
+        +list special_needs
+        +dict routines
+        +list~Task~ tasks
+        +add_task(task) void
+        +get_needs() list
+        +validate_task(task) bool
+    }
+
+    class Task {
+        +string title
+        +string category
+        +int duration_minutes
+        +string priority
+        +string pet_name
+        +string required_time_window
+        +string recurrence
+        +date due_date
+        +bool completed
+        +is_required() bool
+        +get_priority_score() int
+        +mark_complete() Task
+    }
+
+    class ScheduledTask {
+        +Task task
+        +string start_time
+        +string end_time
+        +string reason
+        +get_duration() int
+    }
+
+    class DailySchedule {
+        +string date
+        +string start_time
+        +list~ScheduledTask~ scheduled_tasks
+        +int total_time_available
+        +list explanations
+        +add_task(scheduled_task) void
+        +has_room_for(task, start_time) bool
+        +check_for_conflicts() list~string~
+        +get_explanation() string
+    }
+
+    class Scheduler {
+        +DailySchedule last_schedule
+        +build_schedule(owner, pet, tasks, time_available) DailySchedule
+        +prioritize_tasks(tasks) list~Task~
+        +fit_tasks(prioritized_tasks, time_available) list~Task~
+        +assign_times(tasks, start_time, time_available) DailySchedule
+        +detect_conflicts(schedules) list~string~
+        +complete_task(task, task_list) void
+        +filter_tasks(tasks, completed, pet_name) list~Task~
+        +sort_by_time(tasks) list~Task~
+    }
+
+    %% Relationships
+    Owner "1" --> "0..*" Pet : owns
+    Owner "1" --> "0..*" Task : creates
+    Pet "1" --> "0..*" Task : requires
+    Scheduler "1" --> "0..1" DailySchedule : last_schedule
+    Scheduler "1" --> "1..*" DailySchedule : builds
+    DailySchedule "1" --> "0..*" ScheduledTask : contains
+    ScheduledTask "1" --> "1" Task : wraps
+    Task "1" ..> "0..1" Task : recurs as

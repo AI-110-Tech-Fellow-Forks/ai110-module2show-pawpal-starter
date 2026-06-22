@@ -57,14 +57,18 @@
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+    - I used AI for a lot of the brainstorming and desgin. I think it is very effective at getting the general case right but for opitmizing or making sure the code is actually what you want, its easier to manually make those specific changes. 
 
 - What kinds of prompts or questions were most helpful?
+    - The most helpful prompts were the specific ones. The longer and more specific the prompt the more accurate the solution was. Also asking it to explain certain topics or sections worked really well. 
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+    - One moment was when it was clearly asking me to change one of my classes to refer to a class that just did not exist. Im assmuning it got confused and probably would have fixed it later on in the chat.
 
 - How did you evaluate or verify what the AI suggested?
+    - I made sure to look over any implementations to some extent and also test things myself to make sure it works as intended.
 
 ---
 
@@ -73,7 +77,20 @@
 **a. What you tested**
 
 - What behaviors did you test?
+    - We tests: 
+        - Task completion status — that calling mark_complete() flips task.completed from False to True
+
+        - Pet task count — that calling pet.add_task() increases the length of pet.tasks
+        - Daily recurrence — that marking a daily task complete returns a new Task with due_date = today + 1 day and completed = False
+        - Weekly recurrence — same as above but due_date = today + 7 days
+        - Non-recurring tasks — that mark_complete() returns None instead of a new task when recurrence is empty
+         - Recurrence via Scheduler — that scheduler.complete_task() appends the next occurrence to the task list, growing it from 1 to 2
+        - No cross-pet conflict — that non-overlapping multi-pet schedules return an empty list
+        - Filter by completion status — that filter_tasks(completed=True/False) correctly separates done vs. pending tasks
+
+        - Sort by time window — that tasks with HH:MM time windows come back in chronological order
 - Why were these tests important?
+    - These test are important cause it helps cover some of the potential actions the live site will run into. We want to make sure that these actions work as intended so we can cover a large userbase. 
 
 ```
 =================================== test session starts ===================================
@@ -89,8 +106,9 @@ tests/test_pawpal.py .............                                              
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+    - 4, because covered most cases and realistic user cases and they all passed, but there is always some case that can break it.
 - What edge cases would you test next if you had more time?
-
+    - I would probably test the empty task list, or the identical pet name conflict.
 ---
 
 ## 5. Reflection
@@ -98,14 +116,17 @@ tests/test_pawpal.py .............                                              
 **a. What went well**
 
 - What part of this project are you most satisfied with?
+    - I am most satisfied with how in depth the classes are and how they all came together after all the planning to accomplish different tasks.
 
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
+    - I would try to improve some of the logic to be more user friendly. We can build upon some of the collision and algorithm sections to be more optimal for users. 
 
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+    - I learned that AI is very helpful for planning and desiging but it needs a guide, or else it will go way off track and you will waste a lot of token trying to get it back on track. 
 
 
 ## Sample Output:
